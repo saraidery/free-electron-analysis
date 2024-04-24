@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from scipy.special import factorial2
 
 class Basis: # Currently decontracted, single center even tempered with all l same exponents
-    def __init__(coefficients, exponents, angular_momenta, center):
+    def __init__(self, coefficients, exponents, angular_momenta, center):
         self.coefficients = coefficients
         self.exponents = exponents
         self.angular_momenta = angular_momenta
-        self.n_shells = len(exponents)*len(angular_momenta)
         self.center = center
+        self.n_shells = len(exponents)*len(angular_momenta)
 
     def n_aos(self):
         n_ao = 0

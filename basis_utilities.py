@@ -12,11 +12,10 @@ class Basis: # Currently decontracted, single center even tempered with all l sa
 
     def n_aos(self):
         n_ao = 0
-        for i in np.arange(len(self.exponents)):
-            for l in self.angular_momenta:
-                for x in range(l, -1, -1):
-                    for y in (range(l - x, -1, -1)):
-                        n_ao += 1
+        for l in self.angular_momenta:
+            for x in range(l, -1, -1):
+                for y in (range(l - x, -1, -1)):
+                    n_ao += 1
         return n_ao
 
 def PW_GTO(k, r, A, a, d, x, y, z):
@@ -44,36 +43,32 @@ def evaluate_PWGTOs_at_points(k, r, basis):
 
     A = basis.center
     value = []
+    d = 1.0
     for k_ in k:
-        for i, alpha in enumerate(basis.exponents):
-            d = basis.coefficients[i]
-            for l in basis.angular_momenta:
-                for x in range(l, -1, -1):
-                    for y in (range(l - x, -1, -1)):
-                        z = l - x - y
-                        value.append(PW_GTO(k_, r, A, [alpha], [d], x, y, z))
+        for l, alpha in zip(basis.angular_momenta, basis.exponents):
+            for x in range(l, -1, -1):
+                for y in (range(l - x, -1, -1)):
+                    z = l - x - y
+                    value.append(PW_GTO(k_, r, A, [alpha], [d], x, y, z))
 
     return np.array(value)
 
 def evaluate_GTOs_at_points(r, basis):
     A = basis.center
     value = []
-    for i, alpha in enumerate(basis.exponents):
-        d = basis.coefficients[i]
-        for l in basis.angular_momenta:
-            for x in range(l, -1, -1):
-                for y in (range(l - x, -1, -1)):
-                    z = l - x - y
-                    value.append(GTO(r, A, [alpha], [d], x, y, z))
+    d = 1.0
+    for l, alpha in zip(basis.angular_momenta, basis.exponents):
+        for x in range(l, -1, -1):
+            for y in (range(l - x, -1, -1)):
+                z = l - x - y
+                value.append(GTO(r, A, [alpha], [d], x, y, z))
     return np.array(value)
 
 
-def plot_GTO_basis(filename, basis, x_max=10, n_x=100):
+def plot_GTO_basis(filename, basis, x_max=30, n_x=100):
 
 
     x_ = np.linspace(0, x_max, num=n_x)
-    print(x_.shape)
-
     f = np.zeros([n_x, basis.n_aos()])
 
     for i, x in enumerate(x_):

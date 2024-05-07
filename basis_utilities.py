@@ -3,21 +3,20 @@ import matplotlib.pyplot as plt
 from scipy.special import factorial2
 
 class Basis: # Currently decontracted, single center even tempered with all l same exponents
-    def __init__(coefficients, exponents, angular_momenta, center):
+    def __init__(self, coefficients, exponents, angular_momenta, center):
         self.coefficients = coefficients
         self.exponents = exponents
         self.angular_momenta = angular_momenta
-        self.n_shells = len(exponents)*len(angular_momenta)
         self.center = center
+        self.n_shells = len(exponents)*len(angular_momenta)
 
     def n_aos(self):
         n_ao = 0
-        for i in np.arange(self.n_shells):
-            l = self.angular_momentum[i]
-
-            for x in range(l, -1, -1):
-                for y in (range(l - x, -1, -1)):
-                    n_ao += 1
+        for i in np.arange(len(self.exponents)):
+            for l in self.angular_momenta:
+                for x in range(l, -1, -1):
+                    for y in (range(l - x, -1, -1)):
+                        n_ao += 1
         return n_ao
 
 def PW_GTO(k, r, A, a, d, x, y, z):
@@ -42,6 +41,7 @@ def plane_wave(k, r, sign=1):
     return complex(np.cos(kr), sign*np.sin(kr))
 
 def evaluate_PWGTOs_at_points(k, r, basis):
+
     A = basis.center
     value = []
     for k_ in k:
@@ -51,7 +51,7 @@ def evaluate_PWGTOs_at_points(k, r, basis):
                 for x in range(l, -1, -1):
                     for y in (range(l - x, -1, -1)):
                         z = l - x - y
-                        value.append(PW_GTO(k_, r, A, a, d, x, y, z))
+                        value.append(PW_GTO(k_, r, A, [alpha], [d], x, y, z))
 
     return np.array(value)
 
@@ -64,38 +64,25 @@ def evaluate_GTOs_at_points(r, basis):
             for x in range(l, -1, -1):
                 for y in (range(l - x, -1, -1)):
                     z = l - x - y
-                    value.append(GTO(r, A, alpha, d, x, y, z))
+                    value.append(GTO(r, A, [alpha], [d], x, y, z))
+    return np.array(value)
 
 
 def plot_GTO_basis(filename, basis, x_max=10, n_x=100):
 
+
     x_ = np.linspace(0, x_max, num=n_x)
+    print(x_.shape)
 
     f = np.zeros([n_x, basis.n_aos()])
 
     for i, x in enumerate(x_):
-        r = np.array([x, 0.0, 0.0])
+        r = np.array([0.0, 0.0, x], dtype=float)
         f[i,:] = evaluate_GTOs_at_points(r, basis)
+
 
     fig, ax = plt.subplots()
     for i in np.arange(basis.n_aos()):
         ax.plot(x_, f[:,i], label=f"AO {i}")
 
     plt.savefig(f"{filename}_GTO.png")
-
-
-def plot_PWGTO_basis(filename, basis, x_max=10, n_x=100):
-
-    x_ = np.linspace(0, x_max, num=n_x)
-
-    f = np.zeros([n_x, basis.n_aos()])
-
-    for i, x in enumerate(x_):
-        r = np.array([x, 0.0, 0.0])
-        f[i,:] = evaluate_PWGTOs_at_points(r, basis)
-
-    fig, ax = plt.subplots()
-    for i in np.arange(basis.n_aos()):
-        ax.plot(x_, f[:,i], label=f"AO {i}")
-
-    plt.savefig(f"{filename}_PWGTO.png")

@@ -14,12 +14,6 @@ angular_momentum_dict =  {
 
 
 
-def get_n_cartesian(l):
-    return int(factorial(2 + l) / (factorial(l) * factorial(2)))
-
-def get_n_pure(l):
-    return 2*l + 1
-
 def generate_even_tempered_from_least_diffuse(exp_max, k_max, beta):
 
     exponents = [exp_max]

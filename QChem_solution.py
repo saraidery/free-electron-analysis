@@ -62,16 +62,19 @@ def plot_QC_PWGTO(k, QChem_solution, gto, k_scale_angular_momentum=False):
     x_max = 10
     n_x = 500
 
+    # Generalize the following lines so that r  and k point in the same direction
     x_ = np.linspace(0, x_max, num=n_x)
     r = np.zeros(3, dtype=float)
     y = np.zeros([n_x, gto.n_aos()],dtype=complex)
 
     for i, x in enumerate(x_):
         r[2] = x
-        y[i,:] = evaluate_PWGTOs_at_points([k], r, gto, k_scale_angular_momentum)
+        y[i,:] = evaluate_PWGTOs_at_points([k], r, gto, k_scale_angular_momentum) # Call should be general for any direction of r/k
 
 
     z = np.dot(y,coefficients)
+
+
     z /= np.amax(np.abs(z))
 
     z_sq = np.imag(z)*np.imag(z) + np.real(z)*np.real(z)

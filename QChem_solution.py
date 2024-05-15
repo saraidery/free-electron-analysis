@@ -93,5 +93,5 @@ def plot_QC_PWGTO(k, QChem_solution, gto, k_scale_angular_momentum=False):
     ax[1].set_xlim([0, x_max])
     ax[1].set_ylim([0, 1.0])
     fig.tight_layout()
-    plt.savefig(QChem_solution.replace(".txt", ".png"))
+    plt.savefig(QChem_solution.replace(".txt", ".png").split("/")[-1])
     plt.close()

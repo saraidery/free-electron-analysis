@@ -13,7 +13,6 @@ angular_momentum_dict =  {
 }
 
 
-
 def generate_even_tempered_from_least_diffuse(exp_max, k_max, beta):
 
     exponents = [exp_max]

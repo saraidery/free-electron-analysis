@@ -2,22 +2,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import factorial2
 from even_tempered_basis import *
+from obara_saika.angular_momentum import get_n_cartesian
+
+class PointCharge:
+
+    def __init__(self, center, charge):
+        self.center = center
+        self.charge = charge
 
 class Shell:
-    def __init__(self, A, exponents, coefficients, l):
-        self.A = A
-        self.exponents = exponents
-        self.coefficients = coefficients
+    def __init__(self, center, exponents, coefficients, l):
+        self.center = np.array(center)
+        self.exp = np.array(exponents)
+        self.coeff = np.array(coefficients)
         self.l = l
+        self.k = np.array([0.0, 0.0, 0.0])
+        self.start = None
+        self.stop = None
+
+    def __init__(self, center, exponents, coefficients, l, k):
+        self.center = np.array(center)
+        self.exp = np.array(exponents)
+        self.coeff = np.array(coefficients)
+        self.l = l
+        self.k = k
+        self.start = None
+        self.stop = None
 
     def __repr__(self):
-        return f"exp: {self.exponents}, coef: {self.coefficients}, cen: {self.A}, ang: {self.l}"
+        return f"exp: {self.exp}, coef: {self.coeff}, cen: {self.center}, ang: {self.l}, k: {self.k}"
 
 
 class Basis:
     def __init__(self, shell_list):
         self.shells = shell_list
 
+        self.set_offsets()
+
+    @property
     def n_aos(self):
         n_ao = 0
         for shell in self.shells:
@@ -26,6 +48,22 @@ class Basis:
                 for y in (range(l - x, -1, -1)):
                     n_ao += 1
         return n_ao
+
+    @property
+    def sh_dim(self):
+        return self.n_aos
+
+    def set_offsets(self):
+        offset = 0
+        for shell in self.shells:
+            shell.start = offset
+            offset += get_n_cartesian(shell.l)
+            shell.stop = offset
+
+    def __iter__(self):
+
+        for shell in self.shells:
+            yield shell
 
 
 class EvenTemperedBasis(Basis):
@@ -45,6 +83,26 @@ class EvenTemperedBasis(Basis):
                     self.shells.append(s)
 
 
+        self.set_offsets()
+
+    def __init__(self, N, l, beta, initial_alpha, centers, normalize, k):
+
+        self.shells = []
+
+        for center in centers:
+            for i, l_ in enumerate(l):
+                n = N[i]
+                exponents = generate_even_tempered_from_least_diffuse(initial_alpha, n, beta)
+                for alpha in exponents:
+                    d = 1.0
+                    if normalize:
+                        d = 1.0/(pow(l_/(2.0*alpha), l_/2)*np.exp(-l_/2.0))
+                    s = Shell(center, [alpha], [d], l_, k)
+                    self.shells.append(s)
+
+        self.set_offsets()
+
+
 class QchemBasis(Basis):
     def __init__(self, filename):
 
@@ -53,6 +111,19 @@ class QchemBasis(Basis):
         for i in np.arange(n_shells):
             s = Shell(centers[center_index[i]], exponents[i], coefficients[i], angular_momentum[i])
             self.shells.append(s)
+
+        self.set_offsets()
+
+
+    def __init__(self, filename, k):
+
+        self.shells = []
+        n_shells, exponents, angular_momentum, coefficients, center_index, centers = self.read_qchem_basis(filename)
+        for i in np.arange(n_shells):
+            s = Shell(centers[center_index[i]], exponents[i], coefficients[i], angular_momentum[i], k)
+            self.shells.append(s)
+
+        self.set_offsets()
 
     def read_qchem_basis(self, filename):
 
@@ -182,7 +253,7 @@ def evaluate_PWGTOs_at_points(k, r, basis, k_scale_angular_momentum=False):
             for x in range(l, -1, -1):
                 for y in (range(l - x, -1, -1)):
                     z = l - x - y
-                    value.append(PW_GTO(k_, r, s.A, s.exponents, s.coefficients, x, y, z, k_scale_angular_momentum))
+                    value.append(PW_GTO(k_, r, s.A, s.exp, s.coeff, x, y, z, k_scale_angular_momentum))
 
     return np.array(value)
 
@@ -194,7 +265,7 @@ def evaluate_GTOs_at_points(r, basis):
         for x in range(l, -1, -1):
             for y in (range(l - x, -1, -1)):
                 z = l - x - y
-                value.append(GTO(r, s.A, s.exponents, s.coefficients, x, y, z))
+                value.append(GTO(r, s.A, s.exp, s.coeff, x, y, z))
 
     return np.array(value)
 

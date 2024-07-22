@@ -253,7 +253,7 @@ def evaluate_PWGTOs_at_points(k, r, basis, k_scale_angular_momentum=False):
             for x in range(l, -1, -1):
                 for y in (range(l - x, -1, -1)):
                     z = l - x - y
-                    value.append(PW_GTO(k_, r, s.A, s.exp, s.coeff, x, y, z, k_scale_angular_momentum))
+                    value.append(PW_GTO(k_, r, s.center, s.exp, s.coeff, x, y, z, k_scale_angular_momentum))
 
     return np.array(value)
 
@@ -265,7 +265,7 @@ def evaluate_GTOs_at_points(r, basis):
         for x in range(l, -1, -1):
             for y in (range(l - x, -1, -1)):
                 z = l - x - y
-                value.append(GTO(r, s.A, s.exp, s.coeff, x, y, z))
+                value.append(GTO(r, s.center, s.exp, s.coeff, x, y, z))
 
     return np.array(value)
 

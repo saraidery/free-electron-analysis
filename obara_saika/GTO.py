@@ -38,6 +38,21 @@ class GTO:
 
         return non_axial_normalization
 
+    @property
+    def norm(self):
+        return np.sqrt(factorial2(2 * self.a[0] - 1) * factorial2(2 * self.a[1] - 1) * factorial2(2 * self.a[2] - 1))
+
+    def evaluate(self, r):
+
+        rA = r - self.A
+
+        rA2 = np.dot(rA, rA)
+        angular_part = pow(rA[0],self.a[0])*pow(rA[1],self.a[1])*pow(rA[2],self.a[2])
+
+        radial_part = np.exp(-self.alpha * rA2)
+
+        return self.norm*angular_part*radial_part
+
 
 class PWGTO(GTO):
 

@@ -36,7 +36,6 @@ class Shell:
 class Basis:
     def __init__(self, shell_list):
         self.shells = shell_list
-
         self.set_offsets()
 
     @property
